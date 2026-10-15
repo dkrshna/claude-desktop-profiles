@@ -9,7 +9,7 @@
       "name": "claude-desktop-profiles",
       "source": "./",
       "description": "Instâncias isoladas do Claude Desktop (Windows e macOS) para várias contas em paralelo.",
-      "version": "1.0.0"
+      "version": "1.0.1"
     }
   ]
 }

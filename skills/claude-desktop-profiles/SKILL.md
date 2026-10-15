@@ -18,7 +18,7 @@ Os scripts ficam em `scripts/` ao lado deste arquivo. Use o caminho absoluto a p
 
 1. **Plataforma.** Windows → `scripts/windows/New-ClaudeProfile.ps1` (PowerShell 5.1+). macOS → `scripts/macos/new-claude-profile.sh` (bash 3.2+). Linux não tem Claude Desktop oficial: diga isso e pare.
 2. **Nome.** Se o usuário não deu um nome, pergunte. É o que aparece no atalho/app (`Claude - <Nome>`) e aceita acentos. O slug (nome da pasta) é derivado sem acentos e espaços, por exemplo "Cérebro Comércio" vira `CerebroComercio`. Passe `-Slug`/`--slug` só se o usuário pedir um específico.
-3. **Antes de criar,** liste (`-List`/`--list`) para ver o que já existe e evitar duplicata. Perfis antigos criados à mão aparecem como "(perfil criado sem este script)".
+3. **Antes de criar,** liste (`-List`/`--list`) para ver o que já existe e evitar duplicata. A primeira linha, `(principal)`, é a instância padrão (ícone normal do Claude), que também conta como uma das contas do usuário. Perfis antigos criados à mão aparecem como "(perfil criado sem este script)", com seus atalhos antigos reconhecidos.
 4. **Criar.**
    - Windows: `powershell -NoProfile -ExecutionPolicy Bypass -File "<skill>/scripts/windows/New-ClaudeProfile.ps1" -Name "<Nome>"`
      Opcionais: `-StartMenuShortcut`, `-NoDesktopShortcut`, `-IconPath <.ico>`, `-CopySettingsFrom <pasta .claude>`, `-Launch`, `-ProfilesRoot <dir>`.

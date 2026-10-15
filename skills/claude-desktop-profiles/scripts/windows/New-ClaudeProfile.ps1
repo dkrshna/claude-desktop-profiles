@@ -98,8 +98,17 @@ function Get-ProfileShortcuts([string]$slug) {
     foreach ($d in Get-ShortcutDirs) {
         Get-ChildItem -LiteralPath $d -Filter '*.lnk' -File -ErrorAction SilentlyContinue | ForEach-Object {
             $l = $sh.CreateShortcut($_.FullName)
-            if ($l.TargetPath -match 'wscript\.exe$' -and $l.Arguments -match '^\s*"(?<vbs>[^"]+)"\s+"?(?<slug>[^"\s]+)"?\s*$') {
+            if ($l.TargetPath -notmatch 'wscript\.exe$') { return }
+            if ($l.Arguments -match '^\s*"(?<vbs>[^"]+)"\s+"?(?<slug>[^"\s]+)"?\s*$') {
                 if ($Matches.vbs -eq $vbs -and $Matches.slug -eq $slug) { $_.FullName }
+            } elseif ($l.Arguments -match '^\s*"(?<vbs>[^"]+\.vbs)"\s*$' -and (Test-Path -LiteralPath $Matches.vbs)) {
+                # Atalho antigo, com .vbs/.ps1 proprios do perfil (feitos a mao):
+                # e do perfil se o .vbs, ou o .ps1 que ele chama, cita a pasta dele.
+                $text = Get-Content -LiteralPath $Matches.vbs -Raw
+                $ps1 = [regex]::Match($text, '[A-Za-z]:\\[^"]+\.ps1').Value
+                if ($ps1 -and (Test-Path -LiteralPath $ps1)) { $text += Get-Content -LiteralPath $ps1 -Raw }
+                $dir = [regex]::Escape((Join-Path $ProfilesRoot $slug))
+                if ($text -match ($dir + '(["''\\]|\s|$)')) { $_.FullName }
             }
         }
     }
@@ -180,8 +189,16 @@ foreach ($cloud in @($env:OneDrive, $env:OneDriveConsumer, $env:OneDriveCommerci
 # ---------------------------------------------------------------- -List
 
 if ($List) {
-    if (-not (Test-Path -LiteralPath $ProfilesRoot)) { Write-Host "Nenhum perfil em $ProfilesRoot"; return }
-    Get-ChildItem -LiteralPath $ProfilesRoot -Directory | ForEach-Object {
+    # A instancia principal (icone normal do Claude) nao fica em ProfilesRoot:
+    # usa %APPDATA%\Claude e %USERPROFILE%\.claude. Aparece primeiro na lista.
+    $mainDir = Join-Path $env:APPDATA 'Claude'
+    $mainOpen = [bool](Get-CimInstance Win32_Process -Filter "Name='Claude.exe'" -ErrorAction SilentlyContinue |
+        Where-Object { $_.CommandLine -and $_.CommandLine -notmatch '--type=' -and $_.CommandLine -notmatch '--user-data-dir' })
+    $rows = @()
+    if (Test-Path -LiteralPath $mainDir) {
+        $rows += [pscustomobject]@{ Slug = '(principal)'; Nome = "Instancia padrao - $mainDir"; Aberto = $mainOpen; JaUsado = $true; Atalhos = 'icone normal do Claude' }
+    }
+    if (Test-Path -LiteralPath $ProfilesRoot) { $rows += @(Get-ChildItem -LiteralPath $ProfilesRoot -Directory | ForEach-Object {
         $isProfile = (Test-Path -LiteralPath (Join-Path $_.FullName $markerFile)) -or
                      (Test-Path -LiteralPath (Join-Path $_.FullName 'Local State')) -or
                      (Test-Path -LiteralPath (Join-Path $_.FullName '.claude'))
@@ -195,7 +212,9 @@ if ($List) {
                 Atalhos   = (@(Get-ProfileShortcuts $_.Name) | ForEach-Object { Split-Path $_ -Leaf }) -join '; '
             }
         }
-    } | Format-Table -AutoSize -Wrap
+    }) }
+    if ($rows.Count -le 1) { Write-Host "Nenhum perfil isolado em $ProfilesRoot" }
+    $rows | Format-Table -AutoSize -Wrap
     return
 }
 

@@ -135,6 +135,14 @@ move_to_trash() { # <caminho>
 
 # ------------------------------------------------------------------ --list
 if [ "$mode" = "list" ]; then
+  # A instancia principal (icone normal do Claude) nao fica na raiz dos perfis:
+  # usa ~/Library/Application Support/Claude e ~/.claude.
+  main_dir="$HOME/Library/Application Support/Claude"
+  if [ -d "$main_dir" ]; then
+    if ps -axo command= 2>/dev/null | grep -E '/Contents/MacOS/Claude( |$)' | grep -v -- '--type=' | grep -vq -- '--user-data-dir'; then
+      st="aberto"; else st="fechado"; fi
+    printf '%-28s %-34s %-8s %s\n' "(principal)" "Instancia padrao" "$st" "Claude.app normal"
+  fi
   found=""
   for d in "$root"/*/; do
     d="${d%/}"
@@ -148,7 +156,7 @@ if [ "$mode" = "list" ]; then
       printf '%-28s %-34s %-8s %s\n' "$s" "$n" "$st" "$apps"
     fi
   done
-  [ -n "$found" ] || echo "Nenhum perfil em $root"
+  [ -n "$found" ] || echo "Nenhum perfil isolado em $root"
   exit 0
 fi
 
