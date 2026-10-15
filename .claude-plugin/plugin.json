@@ -1,0 +1,10 @@
+{
+  "name": "claude-desktop-profiles",
+  "version": "1.0.0",
+  "description": "Cria instâncias isoladas do Claude Desktop (Windows e macOS) para usar várias contas em paralelo, cada uma com login, conversas, memória, histórico e settings próprios.",
+  "author": { "name": "dkrshna" },
+  "homepage": "https://github.com/dkrshna/claude-desktop-profiles",
+  "repository": "https://github.com/dkrshna/claude-desktop-profiles",
+  "license": "MIT",
+  "keywords": ["claude-desktop", "profiles", "multi-account", "isolation", "windows", "macos"]
+}

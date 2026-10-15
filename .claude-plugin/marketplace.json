@@ -1,0 +1,15 @@
+{
+  "name": "claude-desktop-profiles",
+  "owner": { "name": "dkrshna" },
+  "metadata": {
+    "description": "Instâncias isoladas do Claude Desktop para usar várias contas em paralelo (Windows e macOS)."
+  },
+  "plugins": [
+    {
+      "name": "claude-desktop-profiles",
+      "source": "./",
+      "description": "Instâncias isoladas do Claude Desktop (Windows e macOS) para várias contas em paralelo.",
+      "version": "1.0.0"
+    }
+  ]
+}
